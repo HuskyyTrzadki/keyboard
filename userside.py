@@ -1,0 +1,1 @@
+from serverside import ZwrocLinkiZOfertamiZeStrony
