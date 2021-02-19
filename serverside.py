@@ -28,10 +28,15 @@ if __name__ == '__main__':
             if "/pl/job" in link and link.count("-") > 3:
                 yield "nofluffjobs.com"+link
     for typeOfJob in typesOfJobs:
-        allinks.append(zwrocLinkiZOfertamiZeStrony(f'https://nofluffjobs.com/pl/jobs/{typeOfJob}'))
-        for SiteNumber in range(1,3):
+        for i in zwrocLinkiZOfertamiZeStrony(f'https://nofluffjobs.com/pl/jobs/{typeOfJob}'):
+            allinks.append(i)
+        for SiteNumber in range(1):
             for i in zwrocLinkiZOfertamiZeStrony(f'https://nofluffjobs.com/pl/jobs/{typeOfJob}?page={str(SiteNumber)}'):
                 allinks.append(i)
+
+    for i in allinks:
+        if allinks.count(i)>1:
+            print(i)
 
     print(len(allinks))
 
