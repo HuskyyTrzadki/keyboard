@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import requests
 import lxml
 import time
+import re
 
 if __name__ == '__main__':
 
@@ -38,38 +39,57 @@ if __name__ == '__main__':
     def getLink(elem):
         return elem[0]
     def getRequirements(link):
-        returnList=set()
         source = requests.get(link).text
         soup = BeautifulSoup(source, 'lxml')
-        for i in soup.findAll("button", {"class": "btn btn-outline-success btn-sm no-cursor text-truncate"}):
-            returnList.add(i.text)
-        return returnList
-
+        return [x.replace('Wymagania obowiązkowe','').strip() for x in (soup.find(class_="d-block pb-2").text).split('  ')]
     def getSalary(link):
-        returnList = []
+        x={}
         source = requests.get(link).text
         soup = BeautifulSoup(source, 'lxml')
-        for i in soup.findAll('h4',class_='mb-0'):
-            returnList.append(i.text)
-        return (returnList[1].split("-")[0].strip(),returnList[1].split("-")[1].replace('PLN','').strip())
+        if len (soup.findAll('h4', class_='mb-0'))>1:
+            x['B2B'] =([x.replace('PLN', '').strip() for x in (soup.findAll('h4', class_='mb-0')[0].text).split("-")])
+            x['ContrOfEmplyment'] =([x.replace('PLN', '').strip() for x in (soup.findAll('h4', class_='mb-0')[1].text).split("-")])
+            print(soup.findAll('h4', class_='mb-0'))
+        else:
+            if'B2B' in soup.find('p', class_='type').text:
+                x['B2B']=([x.replace('PLN', '').strip() for x in (soup.find('h4', class_='mb-0').text).split("-")])
+
+            else:
+                print(soup.find('h4', class_='type'))
+                x['ContrOfEmplyment']=([x.replace('PLN', '').strip() for x in (soup.find('h4', class_='mb-0').text).split("-")])
+        return x
+    #B2B:[1000,200q0]
+    print(getSalary('https://nofluffjobs.com/pl/job/remote-ios-developer-vlogit-3w0j4dr9'))
     def getCity(link):
-        returnList =[]
         source = requests.get(link).text
         soup = BeautifulSoup(source, 'lxml')
         try:
-            return soup.find("li", class_='text-break').text.replace('(Po pandemii)', '').strip()
+            return soup.findAll("li", class_='text-break').text.replace('(Po pandemii)', '').strip()
         except(AttributeError):
             return "REMOTE"
-    print(getCity('https://nofluffjobs.com/pl/job/java-backend-developer-praca-zdalna-finture-remote-w3dcdr7u'))
 
     def getLevel(link):
-        pass
-    def getTypeOfJob(link):
-        pass
-    def getComapanySize(link):
-        pass
-    def getTypeOfEmploymennt(link):
-        pass
+        source = requests.get(link).text
+        soup = BeautifulSoup(source, 'lxml')
+        return [i.text for i in soup.findAll("div", class_='col star-section text-center active')]
+
+    def getTypeOfJob(elem):
+        return elem[1]
+    def getCompanySize(link):
+        source = requests.get(link).text
+        soup = BeautifulSoup(source, 'lxml')
+        try:
+            return [i.text for i in soup.findAll('dd',class_='mb-0')][1].replace('+','').split('-')[1]
+        except IndexError:
+            return [i.text for i in soup.findAll('dd', class_='mb-0')][1].replace('+', '')
+    def getCompanyName(link):
+        source = requests.get(link).text
+        soup = BeautifulSoup(source, 'lxml')
+        return soup.find("dd").text
+
+
+    print(getCompanySize('https://nofluffjobs.com/pl/job/devops-engineer-aws-azure-link-group-remote-xwuagl0j'))
+        #return soup.find("dl").text
 
 
 
